@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const { google } = require('googleapis');
 const fetch = require('node-fetch');
+const Handlebars = require('handlebars');
+const fs = require('fs');
 
 const clientId = '877547519162-9a6arl4dvmrbj2kaej200m46oevqcpda.apps.googleusercontent.com';
 const clientSecret = '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';
@@ -28,6 +30,10 @@ app.get('/test', async (req, res, next) => {
   const spaceToReport = allSpaces.spaces.find((spc) => spc.displayName === 'AICycle Report');
   const spaceToReportId = spaceToReport.name;
 
+  const file = fs.readFileSync('./template_mail.txt', { encoding: 'utf-8' });
+
+  const template = Handlebars.compile(file);
+
   const callSendMessage = await fetch(
     `https://chat.googleapis.com/v1/${spaceToReportId}/messages`,
     {
@@ -37,7 +43,7 @@ app.get('/test', async (req, res, next) => {
         'Content-type': 'application/json',
       },
       body: JSON.stringify({
-        text: 'Hello world',
+        text: template(),
       }),
     }
   );
